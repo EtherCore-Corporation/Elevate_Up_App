@@ -16,7 +16,7 @@ interface PromptCardProps {
     category: {
       name: string
       icon: string
-    }
+    } | null
   }
 }
 

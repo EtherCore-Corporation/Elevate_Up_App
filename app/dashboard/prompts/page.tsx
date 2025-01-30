@@ -13,10 +13,12 @@ interface Prompt {
   title: string
   content: string
   tags: string[]
+  icon: string | null
   category: {
     id: string
     name: string
     icon: string
+    description: string
   } | null
 }
 
@@ -34,14 +36,15 @@ export default function PromptsPage() {
           title,
           content,
           tags,
+          icon,
           category:category_id (
             id,
             name,
-            icon
+            icon,
+            description
           )
         `)
         .eq('is_public', true)
-        .order('created_at', { ascending: false })
 
       if (selectedCategory) {
         query = query.eq('category_id', selectedCategory)
@@ -49,7 +52,10 @@ export default function PromptsPage() {
 
       const { data, error } = await query
       if (error) throw error
-      return data
+      return data.map(prompt => ({
+        ...prompt,
+        category: prompt.category ? prompt.category[0] : null
+      })) as Prompt[]
     },
   })
 
