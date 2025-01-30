@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { BarChart } from '@/components/charts/BarChart'
 import { PieChart } from '@/components/charts/PieChart'
 import { Loader2 } from 'lucide-react'
+import { PageBackground } from '@/components/ui/PageBackground'
 
 export default function DashboardPage() {
   const supabase = createClient()
@@ -34,49 +35,55 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+    <div className="min-h-screen relative overflow-hidden bg-[#0D0B14]">
+      <PageBackground />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="text-sm font-medium">Total Projects</CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalProjects}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="text-sm font-medium">Project Completion</CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">50%</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="text-sm font-medium">Total Tasks</CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalTasks}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="text-sm font-medium">Task Completion</CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">40%</div>
-          </CardContent>
-        </Card>
-      </div>
+      <div className="relative z-10 p-8">
+        <div className="space-y-6">
+          <h1 className="text-3xl font-bold">Dashboard Overview</h1>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="text-sm font-medium">Total Projects</CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats?.totalProjects}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="text-sm font-medium">Project Completion</CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">50%</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="text-sm font-medium">Total Tasks</CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats?.totalTasks}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="text-sm font-medium">Task Completion</CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">40%</div>
+              </CardContent>
+            </Card>
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>Task Progress</CardHeader>
-          <CardContent>
-            <BarChart />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>Project Distribution</CardHeader>
-          <CardContent>
-            <PieChart />
-          </CardContent>
-        </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>Task Progress</CardHeader>
+              <CardContent>
+                <BarChart />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>Project Distribution</CardHeader>
+              <CardContent>
+                <PieChart />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

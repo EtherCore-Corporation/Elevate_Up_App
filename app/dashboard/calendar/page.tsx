@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { TaskStats } from '@/components/dashboard/TaskStats'
+import { PageBackground } from '@/components/ui/PageBackground'
 
 interface Task {
   id: string
@@ -96,94 +97,83 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Stats Summary */}
-      <div className="grid grid-cols-3 gap-4">
-        <StatCard 
-          title="Total Tasks" 
-          value={tasks?.length || 0}
-          icon={ListTodo}
-          className="bg-blue-500/10 text-blue-500"
-        />
-        <StatCard 
-          title="Next Due Task" 
-          value={tasks?.[0]?.title || 'No tasks due'}
-          icon={Clock}
-          className="bg-yellow-500/10 text-yellow-500"
-        />
-        <StatCard 
-          title="Completed" 
-          value={tasks?.filter(t => t.status === 'done').length || 0}
-          icon={CheckCircle}
-          className="bg-green-500/10 text-green-500"
-        />
-      </div>
-
-      <div className="flex justify-between items-center">
-        <div>
+    <div className="min-h-screen relative overflow-hidden bg-[#0D0B14]">
+      <PageBackground />
+      
+      <div className="relative z-10 p-8">
+        <div className="space-y-6">
           <h1 className="text-3xl font-bold">Calendar</h1>
           <p className="text-muted-foreground">
             View and manage your scheduled tasks
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentWeek(date => addDays(date, -7))}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentWeek(date => addDays(date, 7))}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {format(startDate, 'MMMM d')} - {format(endDate, 'MMMM d, yyyy')}
-          </div>
-        </div>
-      </div>
 
-      <Card className="p-6 bg-[#1F2937] border-0">
-        <div className="grid grid-cols-7 gap-4">
-          {weekDays.map((date) => (
-            <div key={date.toISOString()} className="space-y-2">
-              <div className="text-center">
-                <div className="text-sm font-medium">{format(date, 'EEE')}</div>
-                <div className="text-2xl">{format(date, 'd')}</div>
-              </div>
-              <div className="space-y-2 min-h-[200px]">
-                {getTasksForDay(date).map((task) => (
-                  <Card 
-                    key={task.id} 
-                    className="p-2 bg-[#374151] border-0 cursor-pointer hover:bg-gray-800"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-medium text-sm text-white">{task.title}</h4>
-                        <p className="text-xs text-gray-400">{task.project.name}</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <div className={`w-2 h-2 rounded-full ${getStatusColor(task.status)}`} />
-                        <Badge variant="outline" className={getUrgencyColor(task.urgency)}>
-                          {task.urgency}
-                        </Badge>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Calendar</h1>
+            <p className="text-muted-foreground">
+              View and manage your scheduled tasks
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentWeek(date => addDays(date, -7))}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setCurrentWeek(date => addDays(date, 7))}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-          ))}
+            <div className="text-sm text-muted-foreground">
+              {format(startDate, 'MMMM d')} - {format(endDate, 'MMMM d, yyyy')}
+            </div>
+          </div>
         </div>
-      </Card>
 
-      <TaskStats tasks={tasks || []} />
+        <Card className="p-6 bg-[#1F2937] border-0">
+          <div className="grid grid-cols-7 gap-4">
+            {weekDays.map((date) => (
+              <div key={date.toISOString()} className="space-y-2">
+                <div className="text-center">
+                  <div className="text-sm font-medium">{format(date, 'EEE')}</div>
+                  <div className="text-2xl">{format(date, 'd')}</div>
+                </div>
+                <div className="space-y-2 min-h-[200px]">
+                  {getTasksForDay(date).map((task) => (
+                    <Card 
+                      key={task.id} 
+                      className="p-2 bg-[#374151] border-0 cursor-pointer hover:bg-gray-800"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="font-medium text-sm text-white">{task.title}</h4>
+                          <p className="text-xs text-gray-400">{task.project.name}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className={`w-2 h-2 rounded-full ${getStatusColor(task.status)}`} />
+                          <Badge variant="outline" className={getUrgencyColor(task.urgency)}>
+                            {task.urgency}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <TaskStats tasks={tasks || []} />
+      </div>
     </div>
   )
 } 

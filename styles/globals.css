@@ -92,3 +92,19 @@
 .hover\:bg-amethyst-dark:hover {
   background-color: #7744AA;
 }
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}

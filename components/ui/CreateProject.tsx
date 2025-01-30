@@ -17,7 +17,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { projectSchema, type ProjectFormValues } from '@/lib/validations/project'
 import { Loader2Icon } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
+import { projectThemes } from "@/lib/themes"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 
 interface CreateProjectProps {
   open: boolean
@@ -33,15 +36,21 @@ export function CreateProject({ open, onClose, project }: CreateProjectProps) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
+      name: '',
+      description: '',
       status: 'todo',
+      theme: 'amethyst',
       ...project
     }
   })
+
+  const selectedTheme = watch('theme')
 
   React.useEffect(() => {
     if (project) {
@@ -54,34 +63,29 @@ export function CreateProject({ open, onClose, project }: CreateProjectProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      const projectData = {
+        name: data.name,
+        description: data.description || '',
+        status: data.status,
+        theme: data.theme,
+        user_id: user.id,
+      }
+
       if (project?.id) {
-        // Update
         const { error } = await supabase
           .from('projects')
-          .update(data)
+          .update(projectData)
           .eq('id', project.id)
 
         if (error) throw error
-
-        toast({
-          title: "Success",
-          description: "Project updated successfully",
-        })
+        toast({ title: "Success", description: "Project updated successfully" })
       } else {
-        // Create
         const { error } = await supabase
           .from('projects')
-          .insert([{
-            ...data,
-            user_id: user.id,
-          }])
+          .insert([projectData])
 
         if (error) throw error
-
-        toast({
-          title: "Success",
-          description: "Project created successfully",
-        })
+        toast({ title: "Success", description: "Project created successfully" })
       }
 
       queryClient.invalidateQueries({ queryKey: ['projects'] })
@@ -93,37 +97,97 @@ export function CreateProject({ open, onClose, project }: CreateProjectProps) {
         description: error.message,
         variant: "destructive",
       })
-      console.error('Error:', error)
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] bg-[#1F2937] border-gray-800">
         <DialogHeader>
-          <DialogTitle>Create Project</DialogTitle>
+          <DialogTitle className="text-xl font-bold">Create New Project</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="name">Project Name</label>
-            <Input id="name" {...register('name')} />
+            <Label htmlFor="name">Project Name</Label>
+            <Input
+              id="name"
+              className="bg-[#111827] border-gray-800"
+              {...register('name')}
+            />
             {errors.name && (
               <p className="text-sm text-red-500">{errors.name.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="description">Description</label>
-            <Textarea id="description" {...register('description')} />
+            <Label htmlFor="description">Description</Label>
+            <Input
+              id="description"
+              className="bg-[#111827] border-gray-800"
+              {...register('description')}
+            />
             {errors.description && (
               <p className="text-sm text-red-500">{errors.description.message}</p>
             )}
           </div>
+          
+          {/* Theme Selection */}
+          <div className="space-y-4">
+            <Label>Select Theme</Label>
+            <input type="hidden" {...register('theme')} />
+            <RadioGroup
+              value={selectedTheme}
+              onValueChange={(value) => {
+                setValue('theme', value, { shouldValidate: true })
+              }}
+              className="grid grid-cols-2 gap-4"
+            >
+              {projectThemes.map((theme) => {
+                const ThemeIcon = theme.icon
+                return (
+                  <div key={theme.id} className="relative">
+                    <RadioGroupItem
+                      value={theme.id}
+                      id={theme.id}
+                      className="peer sr-only"
+                    />
+                    <Label
+                      htmlFor={theme.id}
+                      className={`
+                        flex items-center gap-2 p-4 rounded-lg border-2 
+                        cursor-pointer transition-all
+                        ${theme.colors.border}
+                        ${selectedTheme === theme.id ? 'border-white ring-2 ring-white/20' : ''}
+                        hover:bg-gray-800/50
+                      `}
+                    >
+                      <div className={`
+                        p-2 rounded-full
+                        bg-gradient-to-br ${theme.colors.gradient}
+                      `}>
+                        <ThemeIcon className={`h-5 w-5 ${theme.colors.text}`} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-white">{theme.name}</p>
+                        <p className="text-xs text-gray-400">{theme.description}</p>
+                      </div>
+                    </Label>
+                  </div>
+                )
+              })}
+            </RadioGroup>
+            {errors.theme && (
+              <p className="text-sm text-red-500">{errors.theme.message}</p>
+            )}
+          </div>
 
           <div className="space-y-2">
-            <label htmlFor="status">Status</label>
-            <Select onValueChange={(value: "todo" | "in_progress" | "completed") => setValue('status', value)}>
-              <SelectTrigger>
+            <Label>Status</Label>
+            <Select 
+              onValueChange={(value: "todo" | "in_progress" | "completed") => setValue('status', value)}
+              defaultValue="todo"
+            >
+              <SelectTrigger className="bg-[#111827] border-gray-800">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -137,8 +201,13 @@ export function CreateProject({ open, onClose, project }: CreateProjectProps) {
             )}
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="border-gray-600"
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -147,9 +216,7 @@ export function CreateProject({ open, onClose, project }: CreateProjectProps) {
                   <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
                   Creating...
                 </>
-              ) : (
-                'Create Project'
-              )}
+              ) : project?.id ? 'Update Project' : 'Create Project'}
             </Button>
           </div>
         </form>

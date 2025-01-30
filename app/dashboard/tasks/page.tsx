@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from '@/components/ui/use-toast'
 import { DashboardStats } from "@/components/ui/DashboardStats"
 import { DashboardCharts } from "@/components/ui/DashboardCharts"
+import { PageBackground } from '@/components/ui/PageBackground'
 
 function InsightCard({ icon: Icon, title, value, subtitle, className }: {
   icon: any
@@ -121,6 +122,11 @@ export default function TasksPage() {
     setShowCreateModal(true)
   }
 
+  const handleClose = () => {
+    setShowCreateModal(false)
+    setEditingTask(null)
+  }
+
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
@@ -130,47 +136,50 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Tasks Dashboard</h1>
-        <Button 
-          onClick={() => {
-            setEditingTask(null)
-            setShowCreateModal(true)
-          }}
-          className="bg-blue-500 hover:bg-blue-600"
-        >
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Add Task
-        </Button>
-      </div>
+    <div className="min-h-screen relative overflow-hidden bg-[#0D0B14]">
+      <PageBackground />
       
-      {/* Stats section */}
-      <div className="mb-6">
-        <DashboardStats />
+      <div className="relative z-10 p-8">
+        <div className="container mx-auto p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Tasks Dashboard</h1>
+            <Button 
+              onClick={() => {
+                setEditingTask(null)
+                setShowCreateModal(true)
+              }}
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add Task
+            </Button>
+          </div>
+          
+          {/* Stats section */}
+          <div className="mb-6">
+            <DashboardStats />
+          </div>
+
+          {/* KanbanBoard with required props */}
+          <div className="mb-6">
+            <KanbanBoard 
+              tasks={tasks || []}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          </div>
+
+          {/* Charts section */}
+          <DashboardCharts />
+
+          {/* Create/Edit Task Modal */}
+          <CreateTask 
+            open={showCreateModal} 
+            onClose={handleClose}
+            task={editingTask}
+          />
+        </div>
       </div>
-
-      {/* KanbanBoard with required props */}
-      <div className="mb-6">
-        <KanbanBoard 
-          tasks={tasks || []}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      </div>
-
-      {/* Charts section */}
-      <DashboardCharts />
-
-      {/* Create/Edit Task Modal */}
-      <CreateTask 
-        open={showCreateModal} 
-        onClose={() => {
-          setShowCreateModal(false)
-          setEditingTask(null)
-        }}
-        task={editingTask}
-      />
     </div>
   )
 } 
