@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
@@ -62,7 +63,14 @@ export function Sidebar() {
     <div className="fixed left-0 h-full w-64 bg-[#111827] text-white p-4 space-y-8">
       {/* Logo */}
       <div className="flex items-center space-x-2 px-2">
-        <h1 className="text-xl font-bold">Elevate Up</h1>
+        <Image
+          src="/logo.png"
+          alt="ElevateUp Logo"
+          width={40}
+          height={40}
+          className="w-10 h-10"
+        />
+        <h1 className="text-xl font-bold text-amethyst">Elevate Up</h1>
       </div>
 
       {/* Navigation */}
@@ -77,8 +85,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors",
                 isActive 
-                  ? "bg-purple-600 text-white"
-                  : "text-gray-400 hover:bg-purple-900/20 hover:text-white"
+                  ? "bg-[#9966CC] text-white"
+                  : "text-gray-400 hover:bg-[#9966CC]/20 hover:text-white"
               )}
             >
               <item.icon className="w-5 h-5" />
