@@ -10,6 +10,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +23,7 @@ import React, { useState } from 'react'
 import { projectThemes } from "@/lib/themes"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { ThemeCard } from "./theme-card"
 
 interface CreateProjectProps {
   open: boolean
@@ -102,124 +105,101 @@ export function CreateProject({ open, onClose, project }: CreateProjectProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] bg-[#1F2937] border-gray-800">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Create New Project</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Project Name</Label>
-            <Input
-              id="name"
-              className="bg-[#111827] border-gray-800"
-              {...register('name')}
-            />
-            {errors.name && (
-              <p className="text-sm text-red-500">{errors.name.message}</p>
-            )}
-          </div>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0">
+        <div className="p-4 sm:p-6 space-y-4">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {project ? 'Edit Project' : 'Create Project'}
+            </DialogTitle>
+            <DialogDescription>
+              {project ? 'Update your project details' : 'Add a new project to your workspace'}
+            </DialogDescription>
+          </DialogHeader>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              className="bg-[#111827] border-gray-800"
-              {...register('description')}
-            />
-            {errors.description && (
-              <p className="text-sm text-red-500">{errors.description.message}</p>
-            )}
-          </div>
-          
-          {/* Theme Selection */}
-          <div className="space-y-4">
-            <Label>Select Theme</Label>
-            <input type="hidden" {...register('theme')} />
-            <RadioGroup
-              value={selectedTheme}
-              onValueChange={(value) => {
-                setValue('theme', value, { shouldValidate: true })
-              }}
-              className="grid grid-cols-2 gap-4"
-            >
-              {projectThemes.map((theme) => {
-                const ThemeIcon = theme.icon
-                return (
-                  <div key={theme.id} className="relative">
-                    <RadioGroupItem
-                      value={theme.id}
-                      id={theme.id}
-                      className="peer sr-only"
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="name">Project Name</Label>
+                <Input
+                  id="name"
+                  className="mt-1.5"
+                  {...register('name')}
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  className="mt-1.5"
+                  {...register('description')}
+                />
+                {errors.description && (
+                  <p className="text-sm text-destructive mt-1">{errors.description.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={watch('status')}
+                  onValueChange={(value: 'todo' | 'in_progress' | 'completed') => setValue('status', value)}
+                >
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">To Do</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Theme</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1.5">
+                  {projectThemes.map((theme) => (
+                    <ThemeCard
+                      key={theme.id}
+                      theme={theme}
+                      selected={watch('theme') === theme.id}
+                      onSelect={() => setValue('theme', theme.id)}
                     />
-                    <Label
-                      htmlFor={theme.id}
-                      className={`
-                        flex items-center gap-2 p-4 rounded-lg border-2 
-                        cursor-pointer transition-all
-                        ${theme.colors.border}
-                        ${selectedTheme === theme.id ? 'border-white ring-2 ring-white/20' : ''}
-                        hover:bg-gray-800/50
-                      `}
-                    >
-                      <div className={`
-                        p-2 rounded-full
-                        bg-gradient-to-br ${theme.colors.gradient}
-                      `}>
-                        <ThemeIcon className={`h-5 w-5 ${theme.colors.text}`} />
-                      </div>
-                      <div>
-                        <p className="font-medium text-white">{theme.name}</p>
-                        <p className="text-xs text-gray-400">{theme.description}</p>
-                      </div>
-                    </Label>
-                  </div>
-                )
-              })}
-            </RadioGroup>
-            {errors.theme && (
-              <p className="text-sm text-red-500">{errors.theme.message}</p>
-            )}
-          </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select 
-              onValueChange={(value: "todo" | "in_progress" | "completed") => setValue('status', value)}
-              defaultValue="todo"
-            >
-              <SelectTrigger className="bg-[#111827] border-gray-800">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todo">Todo</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.status && (
-              <p className="text-sm text-red-500">{errors.status.message}</p>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="border-gray-600"
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : project?.id ? 'Update Project' : 'Create Project'}
-            </Button>
-          </div>
-        </form>
+            <DialogFooter className="pt-2">
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="flex-1 sm:flex-none"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 sm:flex-none"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                      {project ? 'Updating...' : 'Creating...'}
+                    </>
+                  ) : project ? 'Update Project' : 'Create Project'}
+                </Button>
+              </div>
+            </DialogFooter>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   )
