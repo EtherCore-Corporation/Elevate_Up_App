@@ -94,6 +94,34 @@ export default function TasksPage() {
     },
   })
 
+  const { data: taskStats, isLoading: taskStatsLoading } = useQuery({
+    queryKey: ['task-stats'],
+    queryFn: async () => {
+      const { data: tasks, error } = await supabase
+        .from('tasks')
+        .select('status, due_date')
+
+      if (error) throw error
+
+      const now = new Date()
+      const weekEnd = new Date(now)
+      weekEnd.setDate(now.getDate() + 7)
+
+      return {
+        totalTasks: tasks.length,
+        completedTasks: tasks.filter(task => task.status === 'done').length,
+        inProgress: tasks.filter(task => task.status === 'in-progress').length,
+        dueThisWeek: tasks.filter(task => {
+          const dueDate = new Date(task.due_date)
+          return dueDate >= now && dueDate <= weekEnd
+        }).length,
+        completionRate: tasks.length > 0 
+          ? Math.round((tasks.filter(task => task.status === 'done').length / tasks.length) * 100)
+          : 0
+      }
+    }
+  })
+
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
@@ -127,7 +155,7 @@ export default function TasksPage() {
     setEditingTask(null)
   }
 
-  if (isLoading) {
+  if (taskStatsLoading) {
     return (
       <div className="h-full flex items-center justify-center">
         <Loader2Icon className="h-8 w-8 animate-spin text-muted-foreground" />

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-const sidebarItems = [
+export const sidebarItems = [
   {
     title: 'Overview',
     href: '/dashboard',
@@ -60,7 +60,7 @@ export function Sidebar() {
   }
 
   return (
-    <div className="fixed left-0 h-full w-64 bg-[#111827] text-white p-4 space-y-8">
+    <div className="fixed left-0 h-full w-64 bg-[#111827] text-white p-4 space-y-8 hidden lg:block">
       {/* Logo */}
       <div className="flex items-center space-x-2 px-2">
         <Image

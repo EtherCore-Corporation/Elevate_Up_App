@@ -18,14 +18,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import * as z from 'zod'
 import React from 'react'
 import { Loader2Icon } from 'lucide-react'
+import type { Task } from '@/types/task'
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
-  status: z.enum(['todo', 'in_progress', 'done']),
+  status: z.enum(['todo', 'in_progress', 'done']).default('todo'),
   project_id: z.string().min(1, 'Project is required'),
   due_date: z.string().optional(),
-  urgency: z.enum(['low', 'medium', 'high']).default('medium'),
+  urgency: z.enum(['high', 'medium', 'low', 'none']).default('none'),
 })
 
 type TaskFormValues = z.infer<typeof taskSchema>
@@ -63,13 +64,21 @@ export function CreateTask({ open, onClose, task }: CreateTaskProps) {
     resolver: zodResolver(taskSchema),
     defaultValues: {
       status: 'todo',
-      ...task
+      ...(task && {
+        ...task,
+        urgency: task.urgency || 'none',
+        due_date: task.due_date || undefined
+      })
     }
   })
 
   React.useEffect(() => {
     if (task) {
-      reset(task)
+      reset({
+        ...task,
+        urgency: task.urgency || 'none',
+        due_date: task.due_date || undefined
+      })
     }
   }, [task, reset])
 
@@ -178,14 +187,18 @@ export function CreateTask({ open, onClose, task }: CreateTaskProps) {
 
           <div className="space-y-2">
             <label htmlFor="urgency">Urgency</label>
-            <Select onValueChange={(value: "low" | "medium" | "high") => setValue('urgency', value)}>
+            <Select
+              onValueChange={(value) => setValue('urgency', value as 'high' | 'medium' | 'low' | 'none')}
+              defaultValue={task?.urgency || 'none'}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select urgency" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="none">None</SelectItem>
               </SelectContent>
             </Select>
           </div>

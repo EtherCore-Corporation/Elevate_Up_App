@@ -63,7 +63,7 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
   }
 
   return (
-    <Card className="relative overflow-hidden border-0 shadow-lg">
+    <Card className="relative overflow-hidden border-0 shadow-lg h-auto">
       <div 
         className="absolute inset-0 opacity-100" 
         style={cardStyle}
@@ -71,13 +71,13 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
       
       <div className="relative z-10">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-full bg-white/10 backdrop-blur-sm">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="p-2 rounded-full bg-white/10 backdrop-blur-sm shrink-0">
               <ThemeIcon className={`h-5 w-5 ${isLightTheme ? 'text-gray-800' : 'text-white'}`} />
             </div>
             <Link 
               href={`/dashboard/projects/${project.id}`}
-              className={`font-semibold ${isLightTheme ? 'text-gray-800' : 'text-white'} hover:opacity-80 transition`}
+              className={`font-semibold ${isLightTheme ? 'text-gray-800' : 'text-white'} hover:opacity-80 transition truncate`}
             >
               {project.name}
             </Link>
@@ -110,13 +110,13 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
           </DropdownMenu>
         </CardHeader>
 
-        <CardContent>
-          <p className={`text-sm ${isLightTheme ? 'text-gray-800' : 'text-white'} opacity-90`}>
+        <CardContent className="space-y-4">
+          <p className={`text-sm ${isLightTheme ? 'text-gray-800' : 'text-white'} opacity-90 line-clamp-2`}>
             {project.description}
           </p>
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <p className="text-gray-400">Tasks</p>
+              <p className={`text-sm ${isLightTheme ? 'text-gray-600' : 'text-gray-400'}`}>Tasks</p>
               <p className="font-medium">
                 {taskStats?.completed || 0}/{taskStats?.total || 0}
               </p>
@@ -124,12 +124,13 @@ export function ProjectCard({ project, onEdit, onDelete }: ProjectCardProps) {
             <DoughnutChart 
               completed={taskStats?.completed || 0} 
               total={taskStats?.total || 0}
+              size={60}
               lightTheme={isLightTheme}
             />
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-between items-center">
+        <CardFooter className="flex flex-wrap gap-3 justify-between items-center">
           <Badge 
             variant="outline" 
             className={`

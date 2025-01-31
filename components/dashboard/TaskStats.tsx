@@ -33,9 +33,10 @@ export function TaskStats({ tasks }: TaskStatsProps) {
   ]
 
   return (
-    <div className="grid grid-cols-3 gap-4 mt-6">
-      <Card className="p-4 bg-[#1F2937] border-0">
-        <h3 className="text-sm font-medium mb-4">Task Status Overview</h3>
+    <>
+      {/* Task Status Overview */}
+      <Card className="p-4 bg-[#1F2937] border-gray-800 col-span-1 md:col-span-1">
+        <h3 className="font-semibold mb-4">Task Status Overview</h3>
         <div className="flex justify-center">
           <PieChart width={200} height={200}>
             <Pie
@@ -53,8 +54,9 @@ export function TaskStats({ tasks }: TaskStatsProps) {
         </div>
       </Card>
 
-      <Card className="p-4 bg-[#1F2937] border-0">
-        <h3 className="text-sm font-medium mb-4">Task Priority Levels</h3>
+      {/* Task Priority Levels */}
+      <Card className="p-4 bg-[#1F2937] border-gray-800 col-span-1 md:col-span-1">
+        <h3 className="font-semibold mb-4">Task Priority Levels</h3>
         <BarChart width={300} height={200} data={priorityData}>
           <XAxis dataKey="name" />
           <YAxis />
@@ -66,8 +68,9 @@ export function TaskStats({ tasks }: TaskStatsProps) {
         </BarChart>
       </Card>
 
-      <Card className="p-4 bg-[#1F2937] border-0">
-        <h3 className="text-sm font-medium mb-4">Task Completion Timeline</h3>
+      {/* Task Completion Timeline */}
+      <Card className="p-4 bg-[#1F2937] border-gray-800 col-span-1 md:col-span-1">
+        <h3 className="font-semibold mb-4">Task Completion Timeline</h3>
         <AreaChart width={300} height={200} data={timelineData}>
           <XAxis dataKey="name" />
           <YAxis />
@@ -80,6 +83,6 @@ export function TaskStats({ tasks }: TaskStatsProps) {
           />
         </AreaChart>
       </Card>
-    </div>
+    </>
   )
 } 

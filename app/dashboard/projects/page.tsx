@@ -73,42 +73,39 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0D0B14]">
+    <div className="min-h-screen relative overflow-y-auto">
       <PageBackground />
       
-      <div className="relative z-10 p-8">
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Projects</h1>
-            <Button 
-              onClick={() => {
-                setEditingProject(null)
-                setShowCreateModal(true)
-              }}
-              className="bg-blue-500 hover:bg-blue-600"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Create Project
-            </Button>
+      <div className="relative z-10 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Projects</h1>
+            <p className="text-muted-foreground">
+              Manage and organize your projects
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects?.map((project) => (
-              <ProjectCard 
-                key={project.id} 
-                project={project}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-              />
-            ))}
-          </div>
-
-          <CreateProject 
-            open={showCreateModal} 
-            onClose={handleClose}
-            project={editingProject}
-          />
+          <Button onClick={() => setShowCreateModal(true)}>
+            <PlusIcon className="h-4 w-4 mr-2" />
+            Create Project
+          </Button>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {projects?.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+
+        <CreateProject
+          open={showCreateModal}
+          onClose={handleClose}
+          project={editingProject}
+        />
       </div>
     </div>
   )

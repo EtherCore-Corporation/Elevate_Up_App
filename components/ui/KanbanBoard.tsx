@@ -1,6 +1,6 @@
 'use client'
 
-import { Card } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { createClient } from '@/services/supabase/client'
 import { toast } from '@/components/ui/use-toast'
 import { PencilIcon, TrashIcon, MoreVerticalIcon } from 'lucide-react'
@@ -11,6 +11,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useQueryClient } from '@tanstack/react-query'
+import { Badge } from '@/components/ui/badge'
+import { format } from 'date-fns'
+
+type UrgencyLevel = 'high' | 'medium' | 'low' | 'none';
 
 interface Task {
   id: string
@@ -23,6 +27,7 @@ interface Task {
     id: string
     name: string
   }
+  urgency?: UrgencyLevel
 }
 
 interface KanbanBoardProps {
@@ -36,6 +41,22 @@ const columns = [
   { id: 'in_progress', title: 'In Progress' },
   { id: 'done', title: 'Done' }
 ]
+
+// Add urgency color mapping
+const urgencyColors: Record<UrgencyLevel, string> = {
+  high: "bg-red-500/10 border-red-500/20 hover:border-red-500/30",
+  medium: "bg-yellow-500/10 border-yellow-500/20 hover:border-yellow-500/30",
+  low: "bg-green-500/10 border-green-500/20 hover:border-green-500/30",
+  none: "bg-gray-500/10 border-gray-500/20 hover:border-gray-500/30"
+}
+
+// Add urgency badge colors
+const urgencyBadgeColors = {
+  high: "bg-red-500/20 text-red-400",
+  medium: "bg-yellow-500/20 text-yellow-400",
+  low: "bg-green-500/20 text-green-400",
+  none: "bg-gray-500/20 text-gray-400"
+}
 
 export function KanbanBoard({ tasks, onEdit, onDelete }: KanbanBoardProps) {
   const supabase = createClient()
@@ -81,35 +102,14 @@ export function KanbanBoard({ tasks, onEdit, onDelete }: KanbanBoardProps) {
           </div>
           <div className="space-y-4 min-h-[200px]">
             {getTasksByStatus(column.id).map((task) => (
-              <Card key={task.id} className="p-4 bg-[#1F2937] border-0">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-white">{task.title}</h4>
-                      <span className="text-xs text-gray-400">
-                        {task.project?.name}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-400 mt-1">
-                      {task.description}
-                    </p>
-                    {task.due_date && (
-                      <p className={`text-xs mt-2 ${
-                        new Date(task.due_date) < new Date() 
-                          ? 'text-red-500' 
-                          : 'text-gray-500'
-                      }`}>
-                        Due: {new Date(task.due_date).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => onEdit(task)}
-                      className="p-1 hover:bg-gray-700 rounded"
-                    >
-                      <PencilIcon className="h-4 w-4 text-gray-400" />
-                    </button>
+              <Card key={task.id} className={`
+                ${urgencyColors[task.urgency || 'none']}
+                border backdrop-blur-sm
+                hover:shadow-lg transition-all
+              `}>
+                <CardHeader className="p-4 pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-base font-medium">{task.title}</CardTitle>
                     <DropdownMenu>
                       <DropdownMenuTrigger className="p-1 hover:bg-gray-700 rounded">
                         <MoreVerticalIcon className="h-4 w-4 text-gray-400" />
@@ -133,7 +133,20 @@ export function KanbanBoard({ tasks, onEdit, onDelete }: KanbanBoardProps) {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                </div>
+                </CardHeader>
+                <CardContent className="p-4 pt-2 space-y-3">
+                  <p className="text-sm text-gray-400">{task.description}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={urgencyBadgeColors[task.urgency || 'none']}>
+                      {task.urgency ? task.urgency.charAt(0).toUpperCase() + task.urgency.slice(1) : 'No urgency'}
+                    </Badge>
+                    {task.due_date && (
+                      <Badge variant="outline" className="border-gray-700">
+                        Due {format(new Date(task.due_date), 'MMM d')}
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
               </Card>
             ))}
           </div>

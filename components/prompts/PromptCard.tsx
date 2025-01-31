@@ -34,15 +34,15 @@ export function PromptCard({ prompt }: PromptCardProps) {
   }
 
   return (
-    <Card className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-gray-800 backdrop-blur-sm hover:shadow-xl transition-all">
+    <Card className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-gray-800 backdrop-blur-sm hover:shadow-xl transition-all h-full">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium flex justify-between items-center">
-          {prompt.title}
+        <CardTitle className="text-base sm:text-lg font-medium flex justify-between items-start gap-2">
+          <span className="flex-1 truncate">{prompt.title}</span>
           <Button 
             variant="ghost" 
-            size="icon"
+            size="sm"
             onClick={copyToClipboard}
-            className="h-8 w-8"
+            className="shrink-0"
           >
             {copied ? (
               <Check className="h-4 w-4 text-green-500" />
@@ -53,8 +53,8 @@ export function PromptCard({ prompt }: PromptCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-gray-400 line-clamp-3">{prompt.content}</p>
-        <div className="flex items-center gap-2 mt-4">
+        <p className="text-sm text-gray-400 line-clamp-3 mb-4">{prompt.content}</p>
+        <div className="flex flex-wrap items-center gap-2">
           {prompt.category && (
             <Badge variant="secondary" className="bg-blue-500/10 text-blue-400">
               {prompt.category.name}

@@ -96,21 +96,29 @@ export default function CalendarPage() {
     }
   }
 
+  // Calculate task insights
+  const nextDueTask = tasks?.sort((a, b) => 
+    new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+  ).find(task => new Date(task.due_date) >= new Date())
+
+  const urgentTasksCount = tasks?.filter(task => 
+    task.urgency === 'high' && task.status !== 'done'
+  ).length || 0
+
+  const totalTasks = tasks?.length || 0
+  const completedTasksCount = tasks?.filter(task => 
+    task.status === 'done'
+  ).length || 0
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0D0B14]">
       <PageBackground />
       
-      <div className="relative z-10 p-8">
-        <div className="space-y-6">
-          <h1 className="text-3xl font-bold">Calendar</h1>
-          <p className="text-muted-foreground">
-            View and manage your scheduled tasks
-          </p>
-        </div>
-
-        <div className="flex justify-between items-center">
+      <div className="relative z-10 p-4 lg:p-8">
+        {/* Header with Navigation */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Calendar</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Calendar</h1>
             <p className="text-muted-foreground">
               View and manage your scheduled tasks
             </p>
@@ -138,15 +146,45 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <Card className="p-6 bg-[#1F2937] border-0">
-          <div className="grid grid-cols-7 gap-4">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Card className="p-4 bg-[#1F2937] border-gray-800">
+            <h3 className="text-sm text-gray-400">Next Due Task</h3>
+            {nextDueTask ? (
+              <>
+                <p className="text-lg font-semibold mt-1">{nextDueTask.title}</p>
+                <p className="text-sm text-gray-400">
+                  Due {format(new Date(nextDueTask.due_date), 'MMM d')}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-gray-400 mt-1">No upcoming tasks</p>
+            )}
+          </Card>
+
+          <Card className="p-4 bg-[#1F2937] border-gray-800">
+            <h3 className="text-sm text-gray-400">Urgent Tasks</h3>
+            <p className="text-lg font-semibold mt-1">{urgentTasksCount}</p>
+            <p className="text-sm text-gray-400">High priority tasks</p>
+          </Card>
+
+          <Card className="p-4 bg-[#1F2937] border-gray-800">
+            <h3 className="text-sm text-gray-400">Task Overview</h3>
+            <p className="text-lg font-semibold mt-1">{completedTasksCount}/{totalTasks}</p>
+            <p className="text-sm text-gray-400">Tasks completed</p>
+          </Card>
+        </div>
+
+        {/* Calendar Grid */}
+        <Card className="p-6 bg-[#1F2937] border-0 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
             {weekDays.map((date) => (
               <div key={date.toISOString()} className="space-y-2">
                 <div className="text-center">
                   <div className="text-sm font-medium">{format(date, 'EEE')}</div>
                   <div className="text-2xl">{format(date, 'd')}</div>
                 </div>
-                <div className="space-y-2 min-h-[200px]">
+                <div className="space-y-2 min-h-[100px] md:min-h-[200px]">
                   {getTasksForDay(date).map((task) => (
                     <Card 
                       key={task.id} 
@@ -172,7 +210,10 @@ export default function CalendarPage() {
           </div>
         </Card>
 
-        <TaskStats tasks={tasks || []} />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <TaskStats tasks={tasks || []} />
+        </div>
       </div>
     </div>
   )

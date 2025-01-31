@@ -61,6 +61,41 @@ export interface Database {
           owner_id?: string
         }
       }
+      tasks: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          title: string
+          description: string
+          status: 'todo' | 'in_progress' | 'done'
+          due_date: string | null
+          project_id: string
+          urgency: 'high' | 'medium' | 'low' | 'none' | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          title: string
+          description: string
+          status?: 'todo' | 'in_progress' | 'done'
+          due_date?: string | null
+          project_id: string
+          urgency?: 'high' | 'medium' | 'low' | 'none' | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          title?: string
+          description?: string
+          status?: 'todo' | 'in_progress' | 'done'
+          due_date?: string | null
+          project_id?: string
+          urgency?: 'high' | 'medium' | 'low' | 'none' | null
+        }
+      }
     }
   }
 } 
