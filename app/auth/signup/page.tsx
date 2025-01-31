@@ -11,25 +11,50 @@ import { Input } from '@/components/ui/input'
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { signupSchema, type SignupFormValues } from '@/lib/validations/auth'
 import { MailIcon, LockIcon, UserIcon, Loader2Icon } from 'lucide-react'
+import { useToast } from '@/components/ui/use-toast'
 
 export default function Signup() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+  const [attempts, setAttempts] = useState(0)
+  const { toast } = useToast()
+  const supabase = createClient()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
   })
 
   const onSubmit = async (data: SignupFormValues) => {
+    if (attempts >= 5) {
+      toast({
+        title: "Too many attempts",
+        description: "Please try again later",
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
-    const supabase = createClient()
+    setAttempts(prev => prev + 1)
 
     try {
+      // Check if email already exists
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', data.email)
+        .single()
+
+      if (existingUser) {
+        throw new Error('Email already registered')
+      }
+
       const { error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -37,15 +62,23 @@ export default function Signup() {
           data: { 
             full_name: data.fullName,
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
       if (signUpError) throw signUpError
+
       setEmailSent(true)
+      reset() // Clear form
+      setAttempts(0) // Reset attempts after success
 
     } catch (error: any) {
-      console.error('Error:', error.message)
-      alert(error.message)
+      console.error('Error:', error)
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
     }

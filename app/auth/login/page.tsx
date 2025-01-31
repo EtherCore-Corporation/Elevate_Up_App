@@ -12,12 +12,15 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth'
 import { Diamond, Gem, Flower2, MailIcon, LockIcon, Loader2Icon } from 'lucide-react'
 import Image from 'next/image'
+import { useToast } from '@/components/ui/use-toast'
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [attempts, setAttempts] = useState(0)
+  const [lockoutUntil, setLockoutUntil] = useState<Date | null>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     setMounted(true)
@@ -27,28 +30,63 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   })
 
-  const onSubmit = async (data: LoginFormValues) => {
-    setLoading(true)
-    setError(null)
+  const supabase = createClient()
 
-    const supabase = createClient()
+  const onSubmit = async (data: LoginFormValues) => {
+    // Check if account is locked
+    if (lockoutUntil && new Date() < lockoutUntil) {
+      const timeLeft = Math.ceil((lockoutUntil.getTime() - new Date().getTime()) / 1000 / 60)
+      toast({
+        title: "Account temporarily locked",
+        description: `Please try again in ${timeLeft} minutes`,
+        variant: "destructive",
+      })
+      return
+    }
+
+    setLoading(true)
+    setAttempts(prev => prev + 1)
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       })
 
-      if (authError) throw authError
+      if (error) throw error
 
+      // Reset attempts on successful login
+      setAttempts(0)
+      setLockoutUntil(null)
+      reset()
       router.push('/dashboard')
-      router.refresh()
+
     } catch (error: any) {
-      setError(error.message)
+      console.error('Error:', error)
+      
+      // Implement progressive lockout
+      if (attempts >= 3) {
+        const lockoutTime = new Date()
+        lockoutTime.setMinutes(lockoutTime.getMinutes() + Math.pow(2, attempts - 3))
+        setLockoutUntil(lockoutTime)
+        
+        toast({
+          title: "Too many failed attempts",
+          description: "Account temporarily locked. Please try again later.",
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -102,11 +140,6 @@ export default function LoginPage() {
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
-              {error && (
-                <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-                  {error}
-                </div>
-              )}
               <div className="space-y-2">
                 <div className="relative">
                   <Input
