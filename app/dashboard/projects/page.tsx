@@ -76,7 +76,7 @@ export default function ProjectsPage() {
     <div className="min-h-screen relative overflow-y-auto">
       <PageBackground />
       
-      <div className="relative z-10 space-y-6">
+      <div className="relative z-10 p-4 lg:p-8 space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold">Projects</h1>
@@ -90,7 +90,7 @@ export default function ProjectsPage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects?.map((project) => (
             <ProjectCard
               key={project.id}

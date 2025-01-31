@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createClient } from '@/services/supabase/client'
@@ -12,26 +12,60 @@ import { Loader2Icon, UserIcon, KeyIcon } from 'lucide-react'
 import { AvatarUpload } from '@/components/profile/AvatarUpload'
 import { useToast } from '@/components/ui/use-toast'
 
+interface Profile {
+  id: string
+  created_at: string
+  updated_at: string
+  email: string
+  full_name: string | null
+  avatar_url: string | null
+}
+
 export default function ProfilePage() {
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
   const supabase = createClient()
+  const [user, setUser] = useState<Profile | null>(null)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
   })
 
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (authUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single()
+        
+        if (profile) {
+          setUser(profile)
+          // Pre-fill the form with existing data
+          setValue('fullName', profile.full_name || '')
+        }
+      }
+    }
+    getUser()
+  }, [setValue])
+
   const onSubmit = async (data: ProfileFormValues) => {
+    if (!user) return
+
     setLoading(true)
     try {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
           full_name: data.fullName,
+          updated_at: new Date().toISOString()
         })
         .eq('id', user.id)
 
